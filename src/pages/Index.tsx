@@ -1,79 +1,111 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Icon from '@/components/ui/icon';
+
+interface Model {
+  id: number;
+  name: string;
+  image: string;
+  height: string;
+  bust: string;
+  waist: string;
+  hips: string;
+  shoeSize: string;
+  hairColor: string;
+  eyeColor: string;
+  category: string;
+}
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
   const [selectedModel, setSelectedModel] = useState<number | null>(null);
+  const [models, setModels] = useState<Model[]>([]);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [editingModel, setEditingModel] = useState<Model | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  const models = [
-    {
-      id: 1,
-      name: 'Sofia',
-      image: 'https://cdn.poehali.dev/projects/dca9716b-7e34-47c6-94b6-df62cae91468/files/c37b51ad-2984-4c76-b030-d10b9e0db137.jpg',
-      height: '178 cm',
-      bust: '86',
-      waist: '62',
-      hips: '90',
-      shoeSize: '38 EU',
-      hairColor: 'Dark Brown',
-      eyeColor: 'Brown',
-      category: 'Editorial'
-    },
-    {
-      id: 2,
-      name: 'Elena',
-      image: 'https://cdn.poehali.dev/projects/dca9716b-7e34-47c6-94b6-df62cae91468/files/dc6d6440-540d-4663-9a2f-f2b13ce7f023.jpg',
-      height: '180 cm',
-      bust: '84',
-      waist: '60',
-      hips: '88',
-      shoeSize: '39 EU',
-      hairColor: 'Blonde',
-      eyeColor: 'Blue',
-      category: 'Runway'
-    },
-    {
-      id: 3,
-      name: 'Isabella',
-      image: 'https://cdn.poehali.dev/projects/dca9716b-7e34-47c6-94b6-df62cae91468/files/b7659b84-38ff-4dc9-b25b-fe7418e0da4b.jpg',
-      height: '176 cm',
-      bust: '85',
-      waist: '61',
-      hips: '89',
-      shoeSize: '38 EU',
-      hairColor: 'Red',
-      eyeColor: 'Green',
-      category: 'Commercial'
-    },
-    {
-      id: 4,
-      name: 'Olivia',
-      image: 'https://cdn.poehali.dev/projects/dca9716b-7e34-47c6-94b6-df62cae91468/files/24a623f7-a421-461a-bb22-f95dc3181d6a.jpg',
-      height: '179 cm',
-      bust: '87',
-      waist: '63',
-      hips: '91',
-      shoeSize: '39 EU',
-      hairColor: 'Dark Brown',
-      eyeColor: 'Hazel',
-      category: 'High Fashion'
-    },
-    {
-      id: 5,
-      name: 'Victoria',
-      image: 'https://cdn.poehali.dev/projects/dca9716b-7e34-47c6-94b6-df62cae91468/files/b3bdf073-2a5d-493c-b482-e14cd84523ce.jpg',
-      height: '177 cm',
-      bust: '86',
-      waist: '62',
-      hips: '90',
-      shoeSize: '38 EU',
-      hairColor: 'Black',
-      eyeColor: 'Brown',
-      category: 'Beauty'
+  const [formData, setFormData] = useState<Omit<Model, 'id'>>({
+    name: '',
+    image: '',
+    height: '',
+    bust: '',
+    waist: '',
+    hips: '',
+    shoeSize: '',
+    hairColor: '',
+    eyeColor: '',
+    category: ''
+  });
+
+  const handleInputChange = (field: keyof Omit<Model, 'id'>, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleAddModel = () => {
+    const newModel: Model = {
+      id: Date.now(),
+      ...formData
+    };
+    setModels(prev => [...prev, newModel]);
+    setFormData({
+      name: '',
+      image: '',
+      height: '',
+      bust: '',
+      waist: '',
+      hips: '',
+      shoeSize: '',
+      hairColor: '',
+      eyeColor: '',
+      category: ''
+    });
+    setIsAddDialogOpen(false);
+  };
+
+  const handleEditModel = (model: Model) => {
+    setEditingModel(model);
+    setFormData({
+      name: model.name,
+      image: model.image,
+      height: model.height,
+      bust: model.bust,
+      waist: model.waist,
+      hips: model.hips,
+      shoeSize: model.shoeSize,
+      hairColor: model.hairColor,
+      eyeColor: model.eyeColor,
+      category: model.category
+    });
+  };
+
+  const handleUpdateModel = () => {
+    if (editingModel) {
+      setModels(prev => prev.map(m => 
+        m.id === editingModel.id ? { ...editingModel, ...formData } : m
+      ));
+      setEditingModel(null);
+      setFormData({
+        name: '',
+        image: '',
+        height: '',
+        bust: '',
+        waist: '',
+        hips: '',
+        shoeSize: '',
+        hairColor: '',
+        eyeColor: '',
+        category: ''
+      });
     }
-  ];
+  };
+
+  const handleDeleteModel = (id: number) => {
+    setModels(prev => prev.filter(m => m.id !== id));
+  };
 
   const scrollToSection = (section: string) => {
     setActiveSection(section);
@@ -87,7 +119,7 @@ const Index = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-light tracking-wider">Sofia Conception du modele</h1>
-            <div className="flex gap-8">
+            <div className="flex gap-8 items-center">
               <button
                 onClick={() => scrollToSection('home')}
                 className={`text-sm tracking-wide transition-colors hover:text-accent ${
@@ -112,10 +144,171 @@ const Index = () => {
               >
                 ABOUT AGENCY
               </button>
+              <button
+                onClick={() => setIsAdminOpen(!isAdminOpen)}
+                className="p-2 hover:bg-accent/10 rounded-full transition-colors"
+                title="Admin Panel"
+              >
+                <Icon name="Settings" size={20} />
+              </button>
             </div>
           </div>
         </div>
       </nav>
+
+      {isAdminOpen && (
+        <div className="fixed top-16 right-6 z-50 w-96 bg-white shadow-2xl border border-black/10 rounded-lg animate-fade-in">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-light">Admin Panel</h3>
+              <button onClick={() => setIsAdminOpen(false)}>
+                <Icon name="X" size={20} />
+              </button>
+            </div>
+
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full mb-6 bg-black text-white hover:bg-accent hover:text-black">
+                  <Icon name="Plus" size={16} className="mr-2" />
+                  Add New Model
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-light">Add New Model</DialogTitle>
+                </DialogHeader>
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <Label>Name</Label>
+                    <Input value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Category</Label>
+                    <Input value={formData.category} onChange={(e) => handleInputChange('category', e.target.value)} placeholder="e.g. Editorial" />
+                  </div>
+                  <div className="col-span-2">
+                    <Label>Image URL</Label>
+                    <Input value={formData.image} onChange={(e) => handleInputChange('image', e.target.value)} placeholder="https://..." />
+                  </div>
+                  <div>
+                    <Label>Height</Label>
+                    <Input value={formData.height} onChange={(e) => handleInputChange('height', e.target.value)} placeholder="178 cm" />
+                  </div>
+                  <div>
+                    <Label>Bust</Label>
+                    <Input value={formData.bust} onChange={(e) => handleInputChange('bust', e.target.value)} placeholder="86" />
+                  </div>
+                  <div>
+                    <Label>Waist</Label>
+                    <Input value={formData.waist} onChange={(e) => handleInputChange('waist', e.target.value)} placeholder="62" />
+                  </div>
+                  <div>
+                    <Label>Hips</Label>
+                    <Input value={formData.hips} onChange={(e) => handleInputChange('hips', e.target.value)} placeholder="90" />
+                  </div>
+                  <div>
+                    <Label>Shoe Size</Label>
+                    <Input value={formData.shoeSize} onChange={(e) => handleInputChange('shoeSize', e.target.value)} placeholder="38 EU" />
+                  </div>
+                  <div>
+                    <Label>Hair Color</Label>
+                    <Input value={formData.hairColor} onChange={(e) => handleInputChange('hairColor', e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Eye Color</Label>
+                    <Input value={formData.eyeColor} onChange={(e) => handleInputChange('eyeColor', e.target.value)} />
+                  </div>
+                </div>
+                <Button onClick={handleAddModel} className="w-full mt-6 bg-black text-white hover:bg-accent hover:text-black">
+                  Add Model
+                </Button>
+              </DialogContent>
+            </Dialog>
+
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {models.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No models yet. Add your first model!</p>
+              ) : (
+                models.map(model => (
+                  <div key={model.id} className="flex items-center gap-3 p-3 border border-black/10 rounded-lg hover:border-accent transition-colors">
+                    <img src={model.image} alt={model.name} className="w-12 h-12 object-cover rounded" />
+                    <div className="flex-1">
+                      <p className="font-medium">{model.name}</p>
+                      <p className="text-xs text-muted-foreground">{model.category}</p>
+                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button
+                          onClick={() => handleEditModel(model)}
+                          className="p-2 hover:bg-accent/10 rounded-full"
+                        >
+                          <Icon name="Pencil" size={16} />
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="text-2xl font-light">Edit Model</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid grid-cols-2 gap-4 mt-4">
+                          <div>
+                            <Label>Name</Label>
+                            <Input value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} />
+                          </div>
+                          <div>
+                            <Label>Category</Label>
+                            <Input value={formData.category} onChange={(e) => handleInputChange('category', e.target.value)} />
+                          </div>
+                          <div className="col-span-2">
+                            <Label>Image URL</Label>
+                            <Input value={formData.image} onChange={(e) => handleInputChange('image', e.target.value)} />
+                          </div>
+                          <div>
+                            <Label>Height</Label>
+                            <Input value={formData.height} onChange={(e) => handleInputChange('height', e.target.value)} />
+                          </div>
+                          <div>
+                            <Label>Bust</Label>
+                            <Input value={formData.bust} onChange={(e) => handleInputChange('bust', e.target.value)} />
+                          </div>
+                          <div>
+                            <Label>Waist</Label>
+                            <Input value={formData.waist} onChange={(e) => handleInputChange('waist', e.target.value)} />
+                          </div>
+                          <div>
+                            <Label>Hips</Label>
+                            <Input value={formData.hips} onChange={(e) => handleInputChange('hips', e.target.value)} />
+                          </div>
+                          <div>
+                            <Label>Shoe Size</Label>
+                            <Input value={formData.shoeSize} onChange={(e) => handleInputChange('shoeSize', e.target.value)} />
+                          </div>
+                          <div>
+                            <Label>Hair Color</Label>
+                            <Input value={formData.hairColor} onChange={(e) => handleInputChange('hairColor', e.target.value)} />
+                          </div>
+                          <div>
+                            <Label>Eye Color</Label>
+                            <Input value={formData.eyeColor} onChange={(e) => handleInputChange('eyeColor', e.target.value)} />
+                          </div>
+                        </div>
+                        <Button onClick={handleUpdateModel} className="w-full mt-6 bg-black text-white hover:bg-accent hover:text-black">
+                          Update Model
+                        </Button>
+                      </DialogContent>
+                    </Dialog>
+                    <button
+                      onClick={() => handleDeleteModel(model.id)}
+                      className="p-2 hover:bg-destructive/10 rounded-full text-destructive"
+                    >
+                      <Icon name="Trash2" size={16} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <section id="home" className="min-h-screen flex items-center justify-center pt-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-white via-secondary/20 to-white"></div>
@@ -153,38 +346,46 @@ const Index = () => {
             Discover our talented roster of professional models
           </p>
           
-          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {models.map((model, index) => (
-              <Card
-                key={model.id}
-                className="group relative overflow-hidden cursor-pointer border-none shadow-sm hover:shadow-xl transition-all duration-500 animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
-                onClick={() => setSelectedModel(model.id)}
-              >
-                <div className="relative h-[450px]">
-                  <img
-                    src={model.image}
-                    alt={model.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                      <h3 className="text-2xl font-light mb-2">{model.name}</h3>
-                      <div className="space-y-1 text-sm">
-                        <p className="text-white/80">{model.height}</p>
-                        <p className="text-white/80">{model.bust}/{model.waist}/{model.hips}</p>
-                        <p className="text-accent font-medium">{model.category}</p>
+          {models.length === 0 ? (
+            <div className="text-center py-20">
+              <Icon name="Users" size={64} className="mx-auto text-muted-foreground mb-4" />
+              <p className="text-xl text-muted-foreground font-light">No models yet</p>
+              <p className="text-sm text-muted-foreground mt-2">Use the admin panel to add your first model</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {models.map((model, index) => (
+                <Card
+                  key={model.id}
+                  className="group relative overflow-hidden cursor-pointer border-none shadow-sm hover:shadow-xl transition-all duration-500 animate-fade-in"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                  onClick={() => setSelectedModel(model.id)}
+                >
+                  <div className="relative h-[450px]">
+                    <img
+                      src={model.image}
+                      alt={model.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                        <h3 className="text-2xl font-light mb-2">{model.name}</h3>
+                        <div className="space-y-1 text-sm">
+                          <p className="text-white/80">{model.height}</p>
+                          <p className="text-white/80">{model.bust}/{model.waist}/{model.hips}</p>
+                          <p className="text-accent font-medium">{model.category}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className="p-4 bg-white">
-                  <h3 className="text-xl font-light text-center">{model.name}</h3>
-                  <p className="text-sm text-muted-foreground text-center">{model.category}</p>
-                </div>
-              </Card>
-            ))}
-          </div>
+                  <div className="p-4 bg-white">
+                    <h3 className="text-xl font-light text-center">{model.name}</h3>
+                    <p className="text-sm text-muted-foreground text-center">{model.category}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
