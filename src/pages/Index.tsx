@@ -467,9 +467,9 @@ const Index = () => {
             <h2 className="text-5xl font-light mb-8">About Sofia Conception du modele</h2>
             
             <p className="text-xl text-muted-foreground font-light leading-relaxed">
-              Founded in Paris, Sofia Conception du modele is a premier modeling agency dedicated to 
-              discovering and nurturing exceptional talent. We represent models who work with the world's 
-              leading fashion houses, magazines, and brands.
+              Новое модельное агентство, зародившееся в России. Sofia Conception du modele создано для 
+              открытия и развития талантливых моделей. Мы стремимся представить наших моделей ведущим 
+              российским и международным брендам, журналам и дизайнерам.
             </p>
 
             <div className="grid md:grid-cols-3 gap-8 pt-12">
